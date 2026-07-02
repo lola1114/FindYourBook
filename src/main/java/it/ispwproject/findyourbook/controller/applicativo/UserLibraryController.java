@@ -4,6 +4,7 @@ import it.ispwproject.findyourbook.bean.BookBean;
 import it.ispwproject.findyourbook.dao.DAOFactory;
 import it.ispwproject.findyourbook.pattern.singleton.SessionManager;
 import it.ispwproject.findyourbook.model.User;
+import it.ispwproject.findyourbook.util.logger.AppLogger;
 
 public class UserLibraryController {
 
@@ -12,7 +13,7 @@ public class UserLibraryController {
         User currentUser = SessionManager.getInstance().getLoggedUser();
 
         if (currentUser == null) {
-            System.err.println("⚠️ Nessun utente loggato! Impossibile salvare il libro.");
+            AppLogger.logWarning("⚠️ Nessun utente loggato! Impossibile salvare il libro.");
             return;
         }
 
@@ -26,10 +27,9 @@ public class UserLibraryController {
                 DAOFactory.getFavoritesDAO().updateValutazione(currentUser.getUsername(), book.getTitle(), book.getRating());
             }
 
-            System.out.println("✅ [APP CONTROLLER] Salvato il libro: '" + book.getTitle() + "' nello stato: " + status);
+            AppLogger.logInfo("✅ [APP CONTROLLER] Salvato il libro: '" + book.getTitle() + "' nello stato: " + status);
         } catch (Exception e) {
-            System.err.println("❌ Errore durante il salvataggio: " + e.getMessage());
-            e.printStackTrace();
+            AppLogger.logError("❌ Errore durante il salvataggio: " + e.getMessage());
         }
     }
 
@@ -38,7 +38,7 @@ public class UserLibraryController {
         User currentUser = SessionManager.getInstance().getLoggedUser();
 
         if (currentUser == null) {
-            System.err.println("⚠️ Nessun utente loggato! Impossibile rimuovere il libro.");
+            AppLogger.logWarning("⚠️ Nessun utente loggato! Impossibile rimuovere il libro.");
             return;
         }
 
@@ -46,11 +46,10 @@ public class UserLibraryController {
             // Chiamiamo il metodo di rimozione dal DAO
             DAOFactory.getFavoritesDAO().removeLibroPreferito(currentUser.getUsername(), book.getTitle());
 
-            System.out.println("🗑️ [APP CONTROLLER] Rimosso il libro: '" + book.getTitle() +
+            AppLogger.logInfo("🗑️ [APP CONTROLLER] Rimosso il libro: '" + book.getTitle() +
                     "' per l'utente '" + currentUser.getUsername() + "'");
         } catch (Exception e) {
-            System.err.println("❌ Errore durante la rimozione: " + e.getMessage());
-            e.printStackTrace();
+            AppLogger.logError("❌ Errore durante la rimozione: " + e.getMessage());
         }
     }
 
@@ -63,15 +62,15 @@ public class UserLibraryController {
             if (book.getStatus() == null || book.getStatus().trim().isEmpty() || book.getStatus().equals("RIMUOVI")) {
                 book.setStatus("LETTO");
                 DAOFactory.getFavoritesDAO().addLibroPreferito(currentUser.getUsername(), book, "LETTO");
-                System.out.println("📖 Libro aggiunto automaticamente a 'Letto' perché è stato valutato.");
+                AppLogger.logInfo("📖 Libro aggiunto automaticamente a 'Letto' perché è stato valutato.");
             }
 
             // 2. Ora che siamo certi che il libro esiste nel DB, salviamo le stelline!
             DAOFactory.getFavoritesDAO().updateValutazione(currentUser.getUsername(), book.getTitle(), rating);
-            System.out.println("⭐ Voto salvato: " + rating + " stelle per '" + book.getTitle() + "'");
+            AppLogger.logInfo("⭐ Voto salvato: " + rating + " stelle per '" + book.getTitle() + "'");
 
         } catch (Exception e) {
-            System.err.println("Errore durante il salvataggio del voto: " + e.getMessage());
+            AppLogger.logError("Errore durante il salvataggio del voto: " + e.getMessage());
         }
     }
 
@@ -92,7 +91,7 @@ public class UserLibraryController {
                 checkAndSync(googleBook, letti, "LETTO");
             }
         } catch (Exception e) {
-            System.err.println("Errore durante la sincronizzazione: " + e.getMessage());
+            AppLogger.logError("Errore durante la sincronizzazione: " + e.getMessage());
         }
     }
 
@@ -104,15 +103,14 @@ public class UserLibraryController {
             String dbTitle = dbBook.getTitle().toLowerCase().trim();
 
             // SPIA DIAGNOSTICA: Stampiamo cosa sta confrontando il programma!
-            System.out.println("🔍 Sincronizzazione: Confronto Google ['" + gTitle + "'] con DB ['" + dbTitle + "'] -> Voto DB: " + dbBook.getRating());
+            AppLogger.logInfo("🔍 Sincronizzazione: Confronto Google ['" + gTitle + "'] con DB ['" + dbTitle + "'] -> Voto DB: " + dbBook.getRating());
 
             if (gTitle.contains(dbTitle) || dbTitle.contains(gTitle)) {
                 googleBook.setRating(dbBook.getRating());
                 googleBook.setStatus(status);
-                System.out.println("✅ MATCH TROVATO! Copiate " + dbBook.getRating() + " stelle su: " + googleBook.getTitle());
+                AppLogger.logInfo("✅ MATCH TROVATO! Copiate " + dbBook.getRating() + " stelle su: " + googleBook.getTitle());
                 break;
             }
         }
     }
-
 }
