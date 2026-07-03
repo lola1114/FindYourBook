@@ -59,21 +59,18 @@ public class SearchResultsGUIView extends DashboardGUIView {
 
         for (BookBean book : books) {
             VBox card = super.buildBookCard(
-                    null,                                      // 1. Titolo sezione (non serve qui)
-                    book.getTitle(),                           // 2. Titolo libro
-                    book.getAuthor(),                          // 3. Autore
-                    book.getImageUrl(),                        // 4. Immagine di copertina
-                    book.getStatus(),                          // 5. STATO (Passiamo lo stato memorizzato dal DB!)
-                    book.getRating(),                          // 6. VOTO (Passiamo le stelline memorizzate dal DB!)
-                    newStatus -> {                             // 7. Azione Tendina: Salva il nuovo stato
+                    null,                                      // 1. Titolo sezione
+                    book,                                      // 2. L'oggetto book intero!
+                    book.getStatus(),                          // 3. Stato
+                    newStatus -> {                             // 4. Azione Tendina
                         new it.ispwproject.findyourbook.controller.applicativo.UserLibraryController().saveBookToLibrary(book, newStatus);
                         book.setStatus(newStatus);
                     },
-                    rating -> {                                // 8. Azione Stelline: Salva il nuovo voto
+                    rating -> {                                // 5. Azione Stelline
                         new it.ispwproject.findyourbook.controller.applicativo.UserLibraryController().rateBook(book, rating);
                         book.setRating(rating);
                     },
-                    () -> onBookClick.accept(book)             // 9. Click sulla card: Apre il dettaglio del libro
+                    () -> onBookClick.accept(book)             // 6. Click sulla card
             );
             grid.getChildren().add(card);
         }

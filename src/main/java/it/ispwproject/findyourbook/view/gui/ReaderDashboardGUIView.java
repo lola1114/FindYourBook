@@ -1,5 +1,6 @@
 package it.ispwproject.findyourbook.view.gui;
 
+import it.ispwproject.findyourbook.bean.BookBean;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -44,17 +45,22 @@ public class ReaderDashboardGUIView extends DashboardGUIView {
     // ────────────────────────────────────────────────────────────────────────
     // Sezione Raccomandazioni (Equivalente al suo buildCalendarSection)
     // ────────────────────────────────────────────────────────────────────────
+    // Sostituisci il metodo buildRecommendationsSection così:
     private HBox buildRecommendationsSection() {
         HBox section = new HBox(40);
         section.setAlignment(Pos.CENTER);
 
-        // Usa il widget del padre
-        VBox card1 = super.buildBookCard("Il nostro consiglio", "Il cerchio dei giorni", "Ken Follett", null, null, 0, null, null, null);
-        VBox card2 = super.buildBookCard("Le novità dalle Case Editrici", "La bugia dell'orchidea", "Donato Carrisi", null, null, 0, null, null, null);
+        // Creiamo BookBean "finti" per il momento
+        BookBean book1 = new BookBean("Il cerchio dei giorni", "Ken Follett", null, null, null);
+        BookBean book2 = new BookBean("La bugia dell'orchidea", "Donato Carrisi", null, null, null);
+
+        // Ora passiamo l'oggetto book invece di tanti parametri
+        VBox card1 = super.buildBookCard("Il nostro consiglio", book1, null, null, null, null);
+        VBox card2 = super.buildBookCard("Le novità dalle Case Editrici", book2, null, null, null, null);
+
         section.getChildren().addAll(card1, card2);
         return section;
     }
-
     // ────────────────────────────────────────────────────────────────────────
     // Sezione Generi
     // ────────────────────────────────────────────────────────────────────────

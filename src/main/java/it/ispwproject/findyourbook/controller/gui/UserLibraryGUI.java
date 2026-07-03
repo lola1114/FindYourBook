@@ -77,26 +77,22 @@ public class UserLibraryGUI {
 
                 // 3. Trasformiamo i BookBean in schede grafiche (BookCard)
                 List<VBox> bookCards = new ArrayList<>();
+                // Sostituisci il ciclo for dentro loadBooksByStatus così:
                 for (BookBean book : libriTrovati) {
                     VBox card = view.buildBookCard(
                             null,                      // 1. Titolo sezione
-                            book.getTitle(),           // 2. Titolo libro
-                            book.getAuthor(),          // 3. Autore
-                            book.getImageUrl(),        // 4. Immagine
-                            status,                    // 5. Stato (Da leggere, Letto...)
-                            book.getRating(),          // 6. IL VOTO (initialRating)
-                            newStatus -> changeBookStatus(book, newStatus), // 7. Azione Tendina
-                            rating -> {                // 8. Azione Stelline
+                            book,                      // 2. L'OGGETTO BOOK INTERO!
+                            status,                    // 3. Stato
+                            newStatus -> changeBookStatus(book, newStatus), // 4. Azione Tendina
+                            rating -> {                // 5. Azione Stelline
                                 it.ispwproject.findyourbook.controller.applicativo.UserLibraryController appController =
                                         new it.ispwproject.findyourbook.controller.applicativo.UserLibraryController();
                                 appController.rateBook(book, rating);
                                 book.setRating(rating);
                             },
-                            // --- RIGA CORRETTA ---
-                            // Sostituisci la chiamata a BookDetailGUI con questa:
                             () -> new it.ispwproject.findyourbook.controller.gui.BookDetailGUI(stage, book, status,
-                                    () -> new UserLibraryGUI(stage).show() // <--- Torna alla libreria!
-                            ).show()
+                                    () -> new UserLibraryGUI(stage).show()
+                            ).show()                   // 6. Click sulla card
                     );
                     bookCards.add(card);
                 }
