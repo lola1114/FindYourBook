@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.ispwproject.findyourbook.bean.BookBean;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -15,10 +16,12 @@ import java.util.List;
 
 public class OpenLibraryService {
 
-    // Endpoint specifico di Open Library per cercare per "Soggetto" (Genere)
     private static final String API_BASE_URL = "https://openlibrary.org/subjects/";
+    // Risolto code smell: Costante per evitare la duplicazione della stringa
+    private static final String COVER_ID_KEY = "cover_id";
 
-    public List<BookBean> getBooksBySubject(String subjectKey) throws Exception {
+    // Risolto code smell: Sostituito throws Exception con throws IOException
+    public List<BookBean> getBooksBySubject(String subjectKey) throws IOException {
         List<BookBean> bookList = new ArrayList<>();
 
         // Costruiamo l'URL. Chiediamo 20 risultati per avere un buon bilanciamento e velocità
@@ -30,47 +33,54 @@ public class OpenLibraryService {
         connection.setRequestProperty("Accept", "application/json");
 
         if (connection.getResponseCode() != 200) {
-            throw new RuntimeException("Errore Open Library: HTTP " + connection.getResponseCode());
+            // Risolto code smell: Sostituito RuntimeException con IOException
+            throw new IOException("Errore Open Library: HTTP " + connection.getResponseCode());
         }
 
-        InputStreamReader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
-        JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
+        // Usiamo il try-with-resources per assicurarci che il reader venga chiuso
+        try (InputStreamReader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
+            JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
 
-        // Open Library restituisce i libri dentro un array chiamato "works"
-        if (jsonResponse.has("works")) {
-            JsonArray worksArray = jsonResponse.getAsJsonArray("works");
+            // Open Library restituisce i libri dentro un array chiamato "works"
+            if (jsonResponse.has("works")) {
+                JsonArray worksArray = jsonResponse.getAsJsonArray("works");
 
-            for (JsonElement element : worksArray) {
-                JsonObject work = element.getAsJsonObject();
-
-                // 1. Titolo
-                String title = work.has("title") ? work.get("title").getAsString() : "Titolo Sconosciuto";
-
-                // 2. Autore (Open Library ha un array di autori per ogni libro)
-                String author = "Autore Sconosciuto";
-                if (work.has("authors")) {
-                    JsonArray authorsArray = work.getAsJsonArray("authors");
-                    if (!authorsArray.isEmpty()) {
-                        JsonObject authorObj = authorsArray.get(0).getAsJsonObject();
-                        author = authorObj.has("name") ? authorObj.get("name").getAsString() : "Autore Sconosciuto";
-                    }
+                for (JsonElement element : worksArray) {
+                    JsonObject work = element.getAsJsonObject();
+                    // Risolto code smell di Complessità Cognitiva estraendo il metodo
+                    bookList.add(parseWorkItem(work, subjectKey));
                 }
+            }
+        } finally {
+            connection.disconnect();
+        }
 
-                // 3. Copertina (Open Library usa un ID numerico per l'endpoint delle copertine)
-                String imageUrl = null;
-                if (work.has("cover_id") && !work.get("cover_id").isJsonNull()) {
-                    long coverId = work.get("cover_id").getAsLong();
-                    // Generiamo l'URL diretto per la copertina in formato Medium (M) o Large (L)
-                    imageUrl = "https://covers.openlibrary.org/b/id/" + coverId + "-M.jpg";
-                }
+        return bookList;
+    }
 
-                bookList.add(new BookBean(title, author, subjectKey, imageUrl));
+    // --- METODO ESTRATTO PER RIDURRE LA COMPLESSITÀ ---
+    private BookBean parseWorkItem(JsonObject work, String subjectKey) {
+        // 1. Titolo
+        String title = work.has("title") ? work.get("title").getAsString() : "Titolo Sconosciuto";
+
+        // 2. Autore
+        String author = "Autore Sconosciuto";
+        if (work.has("authors")) {
+            JsonArray authorsArray = work.getAsJsonArray("authors");
+            if (!authorsArray.isEmpty()) {
+                JsonObject authorObj = authorsArray.get(0).getAsJsonObject();
+                author = authorObj.has("name") ? authorObj.get("name").getAsString() : "Autore Sconosciuto";
             }
         }
 
-        reader.close();
-        connection.disconnect();
+        // 3. Copertina
+        String imageUrl = null;
+        // Usiamo la costante appena creata
+        if (work.has(COVER_ID_KEY) && !work.get(COVER_ID_KEY).isJsonNull()) {
+            long coverId = work.get(COVER_ID_KEY).getAsLong();
+            imageUrl = "https://covers.openlibrary.org/b/id/" + coverId + "-M.jpg";
+        }
 
-        return bookList;
+        return new BookBean(title, author, subjectKey, imageUrl);
     }
 }
