@@ -200,36 +200,38 @@ public abstract class DashboardGUIView {
         valutaText.setStyle("-fx-font-family: 'Georgia'; -fx-font-size: 13px; -fx-text-fill: " + TEXT_DARK + ";");
         ratingBox.getChildren().add(valutaText);
 
-        Label[] stars = new Label[5];
         final int[] clickedRating = {initialRating};
+        Label[] stars = new Label[5];
 
         for (int i = 0; i < 5; i++) {
-            final int starValue = i + 1;
-            stars[i] = new Label(starValue <= clickedRating[0] ? "★" : "☆");
-            stars[i].setStyle("-fx-font-size: 18px; -fx-text-fill: #E6B800; -fx-cursor: hand;");
-
-            stars[i].setOnMouseEntered(e -> {
-                for (int j = 0; j < 5; j++) stars[j].setText(j < starValue ? "★" : "☆");
-            });
-
-            stars[i].setOnMouseExited(e -> {
-                for (int j = 0; j < 5; j++) stars[j].setText(j < clickedRating[0] ? "★" : "☆");
-            });
-
-            stars[i].setOnMouseClicked(e -> {
-                e.consume();
-                clickedRating[0] = starValue;
-                for (int j = 0; j < 5; j++) stars[j].setText(j < clickedRating[0] ? "★" : "☆");
-
-                // Risolto code smell: Logger al posto di System.out
-                AppLogger.logInfo("Votato " + starValue + " stelle!");
-                if (onRate != null) onRate.accept(starValue);
-            });
-
+            stars[i] = createStar(i, clickedRating, stars, onRate);
             ratingBox.getChildren().add(stars[i]);
         }
-
         return ratingBox;
+    }
+
+    // --- METODO AGGIUNTIVO PER ABBATTERE DEFINITIVAMENTE LA COMPLESSITÀ ---
+    private Label createStar(int index, int[] clickedRating, Label[] stars, IntConsumer onRate) {
+        int starValue = index + 1;
+        Label star = new Label(starValue <= clickedRating[0] ? "★" : "☆");
+        star.setStyle("-fx-font-size: 18px; -fx-text-fill: #E6B800; -fx-cursor: hand;");
+
+        star.setOnMouseEntered(e -> updateStars(stars, starValue, false));
+        star.setOnMouseExited(e -> updateStars(stars, clickedRating[0], false));
+        star.setOnMouseClicked(e -> {
+            e.consume();
+            clickedRating[0] = starValue;
+            updateStars(stars, starValue, true);
+            AppLogger.logInfo("Votato " + starValue + " stelle!");
+            if (onRate != null) onRate.accept(starValue);
+        });
+        return star;
+    }
+
+    private void updateStars(Label[] stars, int rating, boolean isClick) {
+        for (int i = 0; i < 5; i++) {
+            stars[i].setText(i < rating ? "★" : "☆");
+        }
     }
 
     // ────────────────────────────────────────────────────────────────────────
