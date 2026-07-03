@@ -1,12 +1,11 @@
 package it.ispwproject.findyourbook.controller.cli;
 
 import it.ispwproject.findyourbook.controller.applicativo.LoginController;
-import it.ispwproject.findyourbook.controller.applicativo.LoginController.LoginResult;
 import it.ispwproject.findyourbook.pattern.state.AbstractCLIState;
 import it.ispwproject.findyourbook.pattern.state.CLIStateMachine;
 import it.ispwproject.findyourbook.pattern.singleton.SessionManager;
 import it.ispwproject.findyourbook.view.cli.LoginView;
-import it.ispwproject.findyourbook.exception.LoginException;
+
 
 public class LoginCLI extends AbstractCLIState {
 
