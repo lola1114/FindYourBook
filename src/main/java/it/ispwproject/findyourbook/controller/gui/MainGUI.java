@@ -10,9 +10,13 @@ public class MainGUI extends Application {
 
     private static Stage primaryStage;
 
+    private static void setPrimaryStage(Stage stage) {
+        MainGUI.primaryStage = stage;
+    }
+
     @Override
     public void start(Stage stage) {
-        primaryStage = stage;
+        setPrimaryStage(stage);
         stage.setTitle("Find Your Book");
         stage.setWidth(WINDOW_WIDTH);
         stage.setHeight(WINDOW_HEIGHT);

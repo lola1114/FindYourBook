@@ -6,11 +6,13 @@ import it.ispwproject.findyourbook.pattern.singleton.SessionManager;
 import it.ispwproject.findyourbook.view.gui.PublisherDashboardGUIView;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import it.ispwproject.findyourbook.util.logger.AppLogger;
 
 public class PublisherDashboardGUI {
 
     private final Stage stage;
     private final PublisherDashboardGUIView view = new PublisherDashboardGUIView();
+    private static final String AUTORE_ECO = "Umberto Eco";
 
     public PublisherDashboardGUI(Stage stage) {
         this.stage = stage;
@@ -44,26 +46,26 @@ public class PublisherDashboardGUI {
     }
 
     private void handleLogout() {
-        System.out.println("🚪 Logout Casa Editrice ed eliminazione sessione...");
+        AppLogger.logInfo(" Logout Casa Editrice ed eliminazione sessione...");
         SessionManager.getInstance().clearSession();
         MainGUI.showLogin();
     }
 
     private void handlePublishNewBook() {
-        System.out.println("Apertura form di pubblicazione nuovo libro...");
+        AppLogger.logInfo("Apertura form di pubblicazione nuovo libro...");
         // In futuro: new PubblicaLibroGUI(stage).show();
     }
 
     private void handleViewStats() {
-        System.out.println("Apertura pannello statistiche vendite corporate...");
+        AppLogger.logInfo("Apertura pannello statistiche vendite corporate...");
     }
 
     /**
      * Popola temporaneamente la griglia con i libri di proprietà di questo editore.
      */
     private void loadPublisherCatalog() {
-        view.addCatalogCard("Il Nome della Rosa", "Umberto Eco", "978-8806221379", 1450);
-        view.addCatalogCard("Il Pendolo di Foucault", "Umberto Eco", "978-8845292538", 620);
-        view.addCatalogCard("Baudolino", "Umberto Eco", "978-8845277122", 340);
+        view.addCatalogCard("Il Nome della Rosa", AUTORE_ECO, "978-8806221379", 1450);
+        view.addCatalogCard("Il Pendolo di Foucault", AUTORE_ECO, "978-8845292538", 620);
+        view.addCatalogCard("Baudolino", AUTORE_ECO, "978-8845277122", 340);
     }
 }
