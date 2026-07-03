@@ -3,6 +3,7 @@ package it.ispwproject.findyourbook.controller.gui;
 import it.ispwproject.findyourbook.controller.applicativo.LoginController;
 import it.ispwproject.findyourbook.controller.applicativo.LoginController.LoginResult;
 import it.ispwproject.findyourbook.view.gui.LoginGUIView;
+import it.ispwproject.findyourbook.exception.DAOException;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -41,7 +42,7 @@ public class LoginGUI {
                 case SUCCESSO_LETTORE -> MainGUI.showReaderDashboard();
                 case SUCCESSO_CASA_EDITRICE -> MainGUI.showPublisherDashboard();
             }
-        } catch (Exception e) {
+        } catch (DAOException e) { // <-- Risolto il code smell dell'eccezione generica!
             view.setError("Login fallito: " + e.getMessage());
         }
     }

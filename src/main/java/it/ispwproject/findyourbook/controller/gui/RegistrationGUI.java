@@ -72,11 +72,4 @@ public class RegistrationGUI {
         }
     }
 
-    private void showSuccess() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Registrazione");
-        alert.setContentText("Registrazione completata! Ora puoi effettuare il login.");
-        alert.showAndWait();
-        MainGUI.showLogin();
-    }
 }
