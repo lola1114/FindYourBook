@@ -198,7 +198,9 @@ public class RegistrationGUIView {
 
     private VBox createFieldBox(String labelText, Node field) {
         Label l = new Label(labelText);
-        l.getStyleClass().add("field-label");
+        // Usa la costante definita in cima alla classe invece della stringa "field-label"
+        l.getStyleClass().add(CSS_FIELD_LABEL);
+
         if (field instanceof Control) {
             ((Control) field).setPrefWidth(350);
             ((Control) field).setMinHeight(40);

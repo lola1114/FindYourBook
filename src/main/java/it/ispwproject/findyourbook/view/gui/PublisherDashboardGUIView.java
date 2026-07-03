@@ -4,15 +4,13 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 public class PublisherDashboardGUIView {
 
     public final Button logoutBtn = new Button("Logout");
     public final FlowPane catalogGrid = new FlowPane();
 
-    // Palette Colori FindYourBook (Lettore)
+    // Palette Colori
     private static final String BG_COLOR = "#EBE2D4";
     private static final String CARD_BG = "#F8F5F0";
     private static final String TEXT_DARK = "#4A3F35";
@@ -20,17 +18,19 @@ public class PublisherDashboardGUIView {
     private static final String BTN_DARK = "#4A3F35";
     private static final String ACCENT_GREEN = "#85A38D";
 
+    // --- COSTANTE CSS AGGIUNTA ---
+    private static final String STYLE_BG_COLOR = "-fx-background-color: ";
+
     public BorderPane buildRoot(String companyName, String descrizione, Runnable onLogout, Runnable onAddBook, Runnable onStats) {
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: " + BG_COLOR + ";");
+        root.setStyle(STYLE_BG_COLOR + BG_COLOR + ";");
 
         // ────────────────────────────────────────────────────────────────────────
-        // 1. NAVBAR (In alto)
+        // 1. NAVBAR
         // ────────────────────────────────────────────────────────────────────────
         HBox navbar = new HBox(20);
         navbar.setPadding(new Insets(15, 30, 15, 30));
-        // Sfondo Navbar trasparente (o leggermente diverso se preferisci, qui uso lo stesso BG per uniformità)
-        navbar.setStyle("-fx-background-color: " + BG_COLOR + ";");
+        navbar.setStyle(STYLE_BG_COLOR + BG_COLOR + ";");
         navbar.setAlignment(Pos.CENTER_LEFT);
 
         Label title = new Label("FindYourBook");
@@ -55,7 +55,7 @@ public class PublisherDashboardGUIView {
         root.setTop(navbar);
 
         // ────────────────────────────────────────────────────────────────────────
-        // 2. CENTRO (Griglia del Catalogo Libri Pubblicati)
+        // 2. CENTRO
         // ────────────────────────────────────────────────────────────────────────
         VBox centerArea = new VBox(15);
         centerArea.setPadding(new Insets(25));
@@ -72,21 +72,18 @@ public class PublisherDashboardGUIView {
 
         ScrollPane scroll = new ScrollPane(catalogGrid);
         scroll.setFitToWidth(true);
-        // Rimuove i bordi brutti dello scrollpane
         scroll.setStyle("-fx-background-color: transparent; -fx-background: " + BG_COLOR + ";");
-
 
         centerArea.getChildren().addAll(sectionTitle, bioLbl, scroll);
         root.setCenter(centerArea);
 
         // ────────────────────────────────────────────────────────────────────────
-        // 3. DESTRA (Pannello di Gestione Aziendale)
+        // 3. DESTRA
         // ────────────────────────────────────────────────────────────────────────
         VBox rightMenu = new VBox(20);
         rightMenu.setPadding(new Insets(30, 20, 30, 20));
         rightMenu.setPrefWidth(280);
-        // Colore di sfondo leggermente diverso per staccare dal body
-        rightMenu.setStyle("-fx-background-color: " + CARD_BG + "; -fx-border-color: #D3C5B1; -fx-border-width: 0 0 0 1;");
+        rightMenu.setStyle(STYLE_BG_COLOR + CARD_BG + "; -fx-border-color: #D3C5B1; -fx-border-width: 0 0 0 1;");
 
         Label menuTitle = new Label("Gestione Catalogo");
         menuTitle.setStyle("-fx-font-family: 'Georgia'; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: " + TEXT_DARK + ";");
@@ -104,21 +101,16 @@ public class PublisherDashboardGUIView {
         Button btn = new Button(text);
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setPrefHeight(45);
-        // Stile bottone arrotondato, scuro
-        btn.setStyle("-fx-background-color: " + BTN_DARK + "; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-alignment: center-left; -fx-padding: 0 0 0 15; -fx-cursor: hand; -fx-background-radius: 15;");
+        btn.setStyle(STYLE_BG_COLOR + BTN_DARK + "; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-alignment: center-left; -fx-padding: 0 0 0 15; -fx-cursor: hand; -fx-background-radius: 15;");
         btn.setOnAction(e -> action.run());
         return btn;
     }
 
-    /**
-     * Aggiunge una scheda libro specifica per l'editore (mostra le copie vendute/disponibili)
-     */
     public void addCatalogCard(String title, String author, String isbn, int copieVendute) {
         VBox card = new VBox(15);
         card.setPadding(new Insets(20));
-        card.setPrefSize(200, 260); // Leggermente più grande per far respirare il testo
-        // Stile Card tipo lettore
-        card.setStyle("-fx-background-color: " + CARD_BG + "; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 5);");
+        card.setPrefSize(200, 260);
+        card.setStyle(STYLE_BG_COLOR + CARD_BG + "; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 5);");
 
         Label titleLbl = new Label(title);
         titleLbl.setStyle("-fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: " + TEXT_DARK + ";");
@@ -137,7 +129,6 @@ public class PublisherDashboardGUIView {
         HBox statsRow = new HBox(5);
         statsRow.setAlignment(Pos.CENTER_LEFT);
         Label soldLbl = new Label("📈 Venduti: " + copieVendute + " pz");
-        // Etichetta vendite verde pastello
         soldLbl.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 12px; -fx-background-color: #E2EFE5; -fx-text-fill: " + ACCENT_GREEN + "; -fx-padding: 5 10; -fx-background-radius: 10; -fx-font-weight: bold;");
         statsRow.getChildren().add(soldLbl);
 
