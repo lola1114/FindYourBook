@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.ispwproject.findyourbook.bean.BookBean;
+import it.ispwproject.findyourbook.util.logger.AppLogger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,14 +33,16 @@ public class GoogleBooksService {
             properties.load(input);
             API_KEY = properties.getProperty("GOOGLE_BOOKS_API_KEY");
             if (API_KEY == null) {
-                System.err.println("⚠️ Attenzione: GOOGLE_BOOKS_API_KEY non trovata nel file properties.");
+                // Risolto code smell: Usiamo il logger
+                AppLogger.logWarning("⚠️ Attenzione: GOOGLE_BOOKS_API_KEY non trovata nel file properties.");
             }
         } catch (IOException e) {
             throw new ExceptionInInitializerError("Impossibile caricare db.properties per Google Books: " + e.getMessage());
         }
     }
 
-    public List<BookBean> searchBooks(String query) throws Exception {
+    // Cambiato 'throws Exception' in 'throws IOException' per maggiore specificità
+    public List<BookBean> searchBooks(String query) throws IOException {
         List<BookBean> bookList = new ArrayList<>();
 
         if (query == null || query.trim().isEmpty()) {
@@ -54,9 +57,9 @@ public class GoogleBooksService {
         // 2. CONTROLLO CHIAVE: Aggiungiamo la chiave SOLO se esiste davvero!
         if (API_KEY != null && !API_KEY.trim().isEmpty()) {
             urlString += "&key=" + API_KEY;
-            System.out.println("🔑 [Google API] Ricerca in corso CON chiave privata attivata.");
+            AppLogger.logInfo("🔑 [Google API] Ricerca in corso CON chiave privata attivata.");
         } else {
-            System.out.println("⚠️ [Google API] Nessuna chiave trovata, procedo con i limiti gratuiti anonimi.");
+            AppLogger.logInfo("⚠️ [Google API] Nessuna chiave trovata, procedo con i limiti gratuiti anonimi.");
         }
 
         URL url = new URL(urlString);
@@ -65,59 +68,68 @@ public class GoogleBooksService {
         connection.setRequestProperty("Accept", "application/json");
 
         if (connection.getResponseCode() != 200) {
-            throw new RuntimeException("Errore API Google Books: HTTP " + connection.getResponseCode());
+            // Risolto code smell: Usata un'eccezione specifica invece di RuntimeException
+            throw new IOException("Errore API Google Books: HTTP " + connection.getResponseCode());
         }
 
-        InputStreamReader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
-        JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
+        // Usiamo un try-with-resources per chiudere automaticamente il reader
+        try (InputStreamReader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
+            JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
 
-        if (jsonResponse.has("items")) {
-            JsonArray items = jsonResponse.getAsJsonArray("items");
+            if (jsonResponse.has("items")) {
+                JsonArray items = jsonResponse.getAsJsonArray("items");
 
-            for (JsonElement itemElement : items) {
-                JsonObject item = itemElement.getAsJsonObject();
-                JsonObject volumeInfo = item.getAsJsonObject("volumeInfo");
-
-                String title = volumeInfo.has("title") ? volumeInfo.get("title").getAsString() : "Titolo Sconosciuto";
-
-                String author = "Autore Sconosciuto";
-                if (volumeInfo.has("authors")) {
-                    JsonArray authorsArray = volumeInfo.getAsJsonArray("authors");
-                    if (!authorsArray.isEmpty()) {
-                        author = authorsArray.get(0).getAsString();
-                    }
+                for (JsonElement itemElement : items) {
+                    JsonObject item = itemElement.getAsJsonObject();
+                    // Risolto problema di complessità cognitiva chiamando un metodo esterno
+                    bookList.add(parseBookItem(item));
                 }
-                String genre = "Sconosciuto";
-                if (volumeInfo.has("categories")) {
-                    JsonArray categoriesArray = volumeInfo.getAsJsonArray("categories");
-                    if (!categoriesArray.isEmpty()) {
-                        genre = categoriesArray.get(0).getAsString();
-                    }
-                }
+            }
+        } finally {
+            connection.disconnect();
+        }
 
-                String description = "Trama non disponibile.";
-                if (volumeInfo.has("description")) {
-                    description = volumeInfo.get("description").getAsString();
-                }
+        return bookList;
+    }
 
-                String imageUrl = null;
-                if (volumeInfo.has("imageLinks")) {
-                    JsonObject imageLinks = volumeInfo.getAsJsonObject("imageLinks");
-                    if (imageLinks.has("thumbnail")) {
-                        imageUrl = imageLinks.get("thumbnail").getAsString()
-                                .replace("http:", "https:")
-                                .replace("zoom=1", "zoom=0")
-                                .replace("&edge=curl", "");
-                    }
-                }
+    // --- NUOVO METODO ESTRATTO PER RIDURRE LA COMPLESSITÀ ---
+    private BookBean parseBookItem(JsonObject item) {
+        JsonObject volumeInfo = item.getAsJsonObject("volumeInfo");
 
-                bookList.add(new BookBean(title, author, genre, imageUrl, description));
+        String title = volumeInfo.has("title") ? volumeInfo.get("title").getAsString() : "Titolo Sconosciuto";
+
+        String author = "Autore Sconosciuto";
+        if (volumeInfo.has("authors")) {
+            JsonArray authorsArray = volumeInfo.getAsJsonArray("authors");
+            if (!authorsArray.isEmpty()) {
+                author = authorsArray.get(0).getAsString();
             }
         }
 
-        reader.close();
-        connection.disconnect();
+        String genre = "Sconosciuto";
+        if (volumeInfo.has("categories")) {
+            JsonArray categoriesArray = volumeInfo.getAsJsonArray("categories");
+            if (!categoriesArray.isEmpty()) {
+                genre = categoriesArray.get(0).getAsString();
+            }
+        }
 
-        return bookList;
+        String description = "Trama non disponibile.";
+        if (volumeInfo.has("description")) {
+            description = volumeInfo.get("description").getAsString();
+        }
+
+        String imageUrl = null;
+        if (volumeInfo.has("imageLinks")) {
+            JsonObject imageLinks = volumeInfo.getAsJsonObject("imageLinks");
+            if (imageLinks.has("thumbnail")) {
+                imageUrl = imageLinks.get("thumbnail").getAsString()
+                        .replace("http:", "https:")
+                        .replace("zoom=1", "zoom=0")
+                        .replace("&edge=curl", "");
+            }
+        }
+
+        return new BookBean(title, author, genre, imageUrl, description);
     }
 }
