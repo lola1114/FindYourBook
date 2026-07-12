@@ -25,7 +25,6 @@ public class ReaderDAOFile implements ReaderDAO {
     private final List<Reader> readersCache = new ArrayList<>(); // Cache interna per i reader
 
     public ReaderDAOFile() {
-        System.out.println("-----> [DEBUG] STO CREANDO I FILE JSON! <-----");
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
                 .setPrettyPrinting()
@@ -80,7 +79,6 @@ public class ReaderDAOFile implements ReaderDAO {
         File file = new File(FILE_PATH);
         if (!file.exists()) return new HashMap<>();
 
-        // Usiamo esplicitamente java.io.Reader per evitare conflitti con il model Reader!
         try (java.io.Reader fileReader = new FileReader(file)) {
             Type mapType = new TypeToken<HashMap<String, List<Book>>>() {}.getType();
             Map<String, List<Book>> loaded = gson.fromJson(fileReader, mapType);
