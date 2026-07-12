@@ -17,13 +17,11 @@ public class PublisherCatalogCLIView {
 
         CLIRenderer.vuota();
         for (int i = 0; i < catalog.size(); i++) {
-            // Usa il renderer per stampare [1] Titolo - Genere
             CLIRenderer.voceMenu((i + 1), catalog.get(i).getTitle() + " - " + catalog.get(i).getGenre());
         }
     }
 
     public int askBookChoice(int max) {
-        // Usa il controllo numerico protetto del CLIRenderer
         return CLIRenderer.chiediScelta("Seleziona un libro per gestirlo (0 per tornare alla dashboard)", 0, max);
     }
 

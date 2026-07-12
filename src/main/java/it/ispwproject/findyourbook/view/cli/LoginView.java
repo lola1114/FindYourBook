@@ -7,7 +7,7 @@ public class LoginView {
         System.out.println(" (o digita '0' per tornare al menu iniziale)");
         CLIRenderer.vuota();
         String username = CLIRenderer.chiediCampo("Username");
-        if (username.equals("0")) return new String[]{"0", "0"}; // Segnale di uscita
+        if (username.equals("0")) return new String[]{"0", "0"};
 
         String password = CLIRenderer.chiediCampo("Password");
         return new String[]{username, password};

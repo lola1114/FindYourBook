@@ -22,7 +22,7 @@ public class UserLibraryCLIView {
             case "1" -> ReadingStatus.TO_READ;
             case "2" -> ReadingStatus.READING;
             case "3" -> ReadingStatus.READ;
-            default -> null; // 0 o input non valido
+            default -> null;
         };
     }
 

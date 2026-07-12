@@ -7,7 +7,6 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
-import it.ispwproject.findyourbook.exception.DAOException; // o NotificationException se l'hai creata
 import it.ispwproject.findyourbook.exception.NotificationException;
 import it.ispwproject.findyourbook.util.logger.AppLogger;
 
@@ -183,7 +182,7 @@ public class NotificationService {
             Response response = sg.api(request);
 
             if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-
+                AppLogger.logInfo("Email inviata con successo tramite SendGrid.");
             } else {
                 throw new NotificationException("Errore SendGrid (Status " + response.getStatusCode() + "): " + response.getBody());
             }

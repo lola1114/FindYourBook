@@ -13,6 +13,8 @@ import javafx.scene.layout.VBox;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
+import static java.io.File.separator;
+
 public class BookDetailGUIView extends DashboardGUIView {
 
     public VBox buildRoot(String username, BookBean book, ReadingStatus currentStatus,
@@ -80,6 +82,7 @@ public class BookDetailGUIView extends DashboardGUIView {
         return leftColumn;
     }
 
+
     private MenuButton createStatusButton(BookBean book, ReadingStatus currentStatus, Consumer<String> onStatusChange, HBox ratingBox, IntConsumer onRate) {
         String statusText = "Aggiungi a...";
         if (currentStatus == ReadingStatus.TO_READ) statusText = ReadingStatus.TO_READ.getDisplayName();
@@ -89,7 +92,6 @@ public class BookDetailGUIView extends DashboardGUIView {
         MenuButton statusBtn = new MenuButton(statusText);
         statusBtn.setStyle("-fx-background-color: #85A38D; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand; -fx-padding: 5 15;");
 
-        // Usiamo i nomi display dell'Enum per le opzioni
         MenuItem optWantToRead = new MenuItem(ReadingStatus.TO_READ.getDisplayName());
         MenuItem optReading = new MenuItem(ReadingStatus.READING.getDisplayName());
         MenuItem optRead = new MenuItem(ReadingStatus.READ.getDisplayName());
@@ -98,7 +100,6 @@ public class BookDetailGUIView extends DashboardGUIView {
         MenuItem optRemove = new MenuItem("Rimuovi libro");
         optRemove.setStyle("-fx-text-fill: #C0392B;");
 
-        // Azioni: aggiornano il testo e passano al controller la stringa corretta
         optWantToRead.setOnAction(e -> {
             statusBtn.setText(ReadingStatus.TO_READ.getDisplayName());
             onStatusChange.accept(ReadingStatus.TO_READ.getDisplayName());
@@ -114,6 +115,13 @@ public class BookDetailGUIView extends DashboardGUIView {
             onStatusChange.accept(ReadingStatus.READ.getDisplayName());
         });
 
+        setupRemoveAction(statusBtn, book, onStatusChange, ratingBox, onRate, optRemove);
+
+        statusBtn.getItems().addAll(optWantToRead, optReading, optRead, separator, optRemove);
+        return statusBtn;
+    }
+
+    private void setupRemoveAction(MenuButton statusBtn, BookBean book, Consumer<String> onStatusChange, HBox ratingBox, IntConsumer onRate, MenuItem optRemove) {
         optRemove.setOnAction(e -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Rimuovi Libro");
@@ -128,7 +136,7 @@ public class BookDetailGUIView extends DashboardGUIView {
                 if (type == btnOk) {
                     statusBtn.setText("Aggiungi a...");
                     book.setStatus(null);
-                    onStatusChange.accept("Rimuovi libro"); // La GUI principale si aspetta questa stringa!
+                    onStatusChange.accept("Rimuovi libro");
 
                     for (int i = 1; i <= 5; i++) ((Label) ratingBox.getChildren().get(i)).setText("☆");
                     int[] clickedRating = (int[]) ratingBox.getProperties().get("clickedRating");
@@ -137,9 +145,6 @@ public class BookDetailGUIView extends DashboardGUIView {
                 }
             });
         });
-
-        statusBtn.getItems().addAll(optWantToRead, optReading, optRead, separator, optRemove);
-        return statusBtn;
     }
 
     private HBox createRatingBox(BookBean book, IntConsumer onRate) {

@@ -40,7 +40,6 @@ public class SessionManager {
         return loggedUser != null;
     }
 
-    // Metodi di controllo ruolo adattati al tuo progetto
     public boolean isLettore() {
         return isLoggedIn() && loggedUser.getRole() == Role.READER;
     }
