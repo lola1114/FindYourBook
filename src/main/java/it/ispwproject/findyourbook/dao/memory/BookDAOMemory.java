@@ -17,7 +17,6 @@ public class BookDAOMemory implements BookDAO {
 
     @Override
     public void save(Book book) throws DAOException {
-        // Generiamo un ID fittizio e aggiungiamo il libro alla lista in memoria
         book.setId(DemoDataStore.getInstance().getBooks().size() + 1);
         DemoDataStore.getInstance().getBooks().add(book);
     }

@@ -35,7 +35,7 @@ public class PublisherDAOMemory implements PublisherDAO {
         b.setDescription(book.getDescription());
         b.setImageUrl(book.getImageUrl());
         b.setPublisherUsername(publisherUsername);
-        b.setCopieVendute(0); // Parte sempre da 0
+        b.setCopieVendute(0);
 
         DemoDataStore.getInstance().getBooks().add(b);
     }
@@ -44,7 +44,7 @@ public class PublisherDAOMemory implements PublisherDAO {
     public List<Book> getCatalogByPublisher(String username) throws DAOException {
         return DemoDataStore.getInstance().getBooks().stream()
                 .filter(b -> b.getPublisherUsername() != null && b.getPublisherUsername().equals(username))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -67,16 +67,13 @@ public class PublisherDAOMemory implements PublisherDAO {
     @Override
     public PublisherStats getPublisherStatistics(String publisherUsername) throws DAOException {
 
-        // 1. Peschiamo tutti i libri di questo editore
         List<Book> publisherBooks = DemoDataStore.getInstance().getBooks().stream()
                 .filter(b -> b.getPublisherUsername() != null && b.getPublisherUsername().equals(publisherUsername))
                 .toList();
 
-        // 2. Calcoli aggregati veloci
         int totalBooks = publisherBooks.size();
         int totalSales = publisherBooks.stream().mapToInt(Book::getCopieVendute).sum();
 
-        // 3. Top 4 venduti usando la Stream API e collezionandoli in una Mappa Ordinata (LinkedHashMap)
         Map<String, Integer> topSelling = publisherBooks.stream()
                 .sorted(Comparator.comparingInt(Book::getCopieVendute).reversed())
                 .limit(4)
@@ -87,7 +84,6 @@ public class PublisherDAOMemory implements PublisherDAO {
                         LinkedHashMap::new // Mantiene l'ordinamento inserito!
                 ));
 
-        // 4. Vendite per genere (Raggruppiamo i libri per genere e sommiamo le copie)
         Map<String, Integer> byGenre = publisherBooks.stream()
                 .collect(Collectors.groupingBy(
                         Book::getGenre,

@@ -35,8 +35,7 @@ public class ReaderDAOMemory implements ReaderDAO {
         book.setStatus(statusEnum);
 
         if (ReadingStatus.READING.equals(statusEnum)) {
-            // Se sta iniziando a leggere, salviamo la data di oggi
-            book.setReadingStartDate(LocalDate.now());
+            book.setReadingStartDate(LocalDate.now(java.time.ZoneId.systemDefault()));
         }
 
 
@@ -60,7 +59,6 @@ public class ReaderDAOMemory implements ReaderDAO {
         if (store.getFavorites().containsKey(username)) {
             store.getFavorites().get(username).removeIf(b -> b.getTitle().equalsIgnoreCase(title));
         }
-        // Resettiamo lo stato anche nel catalogo generale in memoria
         store.getBooks().stream()
                 .filter(b -> b.getTitle().equalsIgnoreCase(title))
                 .findFirst()
@@ -86,6 +84,6 @@ public class ReaderDAOMemory implements ReaderDAO {
     public List<Book> getBooksByStatus(String username, String status) throws DAOException {
         return store.getFavorites().getOrDefault(username, new ArrayList<>()).stream()
                 .filter(b -> status != null && b.getStatus() != null && status.equalsIgnoreCase(b.getStatus().name()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

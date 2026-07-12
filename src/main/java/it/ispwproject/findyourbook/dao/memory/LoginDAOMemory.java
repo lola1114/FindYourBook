@@ -12,7 +12,6 @@ public class LoginDAOMemory implements LoginDAO {
     public Credentials execute(String username, String plainPassword) throws LoginException {
         DemoDataStore store = DemoDataStore.getInstance();
 
-        // 1. Cerchiamo l'utente (stesso stile del collega)
         User user = store.getUsers().stream()
                 .filter(u -> u.getUsername().equalsIgnoreCase(username))
                 .findFirst()

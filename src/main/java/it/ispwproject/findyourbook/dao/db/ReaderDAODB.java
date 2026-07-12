@@ -29,7 +29,7 @@ public class ReaderDAODB implements ReaderDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    LocalDate regDate = rs.getDate("data_registrazione") != null ? rs.getDate("data_registrazione").toLocalDate() : LocalDate.now();
+                    LocalDate regDate = rs.getDate("data_registrazione") != null ? rs.getDate("data_registrazione").toLocalDate() : LocalDate.now(java.time.ZoneId.systemDefault());
                     LocalDate birthDate = rs.getDate("data_nascita") != null ? rs.getDate("data_nascita").toLocalDate() : null;
 
                     return new Reader(
@@ -71,7 +71,7 @@ public class ReaderDAODB implements ReaderDAO {
 
             java.sql.Date sqlDate = null;
             if ("READING".equalsIgnoreCase(readingStatus) || "IN LETTURA".equalsIgnoreCase(readingStatus)) {
-                sqlDate = java.sql.Date.valueOf(LocalDate.now());
+                sqlDate = java.sql.Date.valueOf(LocalDate.now(java.time.ZoneId.systemDefault()));
             }
             stmt.setDate(7, sqlDate);
 

@@ -43,7 +43,7 @@ public class UserDAODB implements UserDAO {
                 Role role = Role.fromString(rs.getString("ruolo"));
 
                 java.sql.Date sqlRegDate = rs.getDate("data_registrazione");
-                LocalDate regDate = (sqlRegDate != null) ? sqlRegDate.toLocalDate() : LocalDate.now();
+                LocalDate regDate = (sqlRegDate != null) ? sqlRegDate.toLocalDate() : LocalDate.now(java.time.ZoneId.systemDefault());
 
                 java.sql.Date sqlBirthDate = rs.getDate("data_nascita");
                 LocalDate birthDate = (sqlBirthDate != null) ? sqlBirthDate.toLocalDate() : null;
@@ -74,7 +74,7 @@ public class UserDAODB implements UserDAO {
                 Role role = Role.fromString(rs.getString("ruolo"));
 
                 java.sql.Date sqlRegDate = rs.getDate("data_registrazione");
-                LocalDate regDate = (sqlRegDate != null) ? sqlRegDate.toLocalDate() : LocalDate.now();
+                LocalDate regDate = (sqlRegDate != null) ? sqlRegDate.toLocalDate() : LocalDate.now(java.time.ZoneId.systemDefault());
 
                 java.sql.Date sqlBirthDate = rs.getDate("data_nascita");
                 LocalDate birthDate = (sqlBirthDate != null) ? sqlBirthDate.toLocalDate() : null;
